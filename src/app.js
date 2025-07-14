@@ -9,9 +9,12 @@ app.get("/user/data",userAuth,(req,res)=>{
     res.send("User Data sent");
 })
 app.get("/admin/getAllData",(req,res)=>{
-    res.send("All data sent");
+    // res.send("All data sent");
+    throw new Error("Something went Wrong");
 })
-
+app.use("/",(err,req,res,next)=>{
+    res.status(500).send(err.message)
+});
 app.listen(PORT,()=>{
     console.log(`Server started on PORT : ${PORT}`);
 })
