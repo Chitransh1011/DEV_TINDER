@@ -1,17 +1,12 @@
 const express = require("express");
 const PORT = 3000;
 const app = express();
-app.use("/routes",[(req,res,next)=>{
-    console.log("Route Handler 1");
-    next();
-},(req,res,next)=>{
-    console.log("Route Handler 2");
-    next();
-}],(req,res,next)=>{
-    console.log("Route Handler 3");
-    res.send("Route Handler 3");
-})
+const {adminAuth} = require('./middlewares/auth');
 
+app.use("/admin",adminAuth);
+app.get("/admin/getAllData",(req,res)=>{
+    res.send("All data sent");
+})
 
 app.listen(PORT,()=>{
     console.log(`Server started on PORT : ${PORT}`);
