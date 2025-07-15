@@ -5,18 +5,10 @@ const { adminAuth, userAuth } = require("./middlewares/auth");
 const User = require("./models/user");
 const app = express();
 
-// DUMMY DATA
-const data = {
-  firstName: "Virat",
-  lastName: "Kohli",
-  emailId: "virat@gmail.com",
-  password: "virat@123",
-  age: 35,
-  gender: "Male",
-};
+app.use(express.json());
 app.post("/signup", async (req, res) => {
   try {
-    const user = new User(data);
+    const user = new User(req.body);
     await user.save();
     res.send("User signuped successfully");
   } catch (error) {
