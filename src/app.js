@@ -11,14 +11,23 @@ app.post("/signup", async (req, res) => {
     const data = req.body;
     const email = data?.emailId;
     const password = data?.password;
-    if(!email || !password){
-        res.status(404).send("Email and Password is required");
+    if (!email || !password) {
+      res.status(404).send("Email and Password is required");
     }
     const user = new User(req.body);
+    console.log(user);
     await user.save();
     res.send("User signuped successfully");
   } catch (error) {
-    console.error(error.message);
+   
+    if (error.name === "ValidationError") {
+        // this .errors and .name how you got to know console.log(error to check what are there )and you will se errors->will give Object
+      const errors = Object.values(error.errors).map((err) => ({
+        field: err.path,
+        message: err.message,
+      }));
+      return res.status(400).json({ message: "Validation failed", errors });
+    }
   }
 });
 app.get("/user", async (req, res) => {
@@ -67,16 +76,16 @@ app.patch("/user/:userId", async (req, res) => {
     const userId = req.params.userId;
     const data = req.body;
 
-    const allowedUpdates = [
-        "age","gender","firstName","lastName"
-    ];
-    const isUpdatedAllowed = Object.keys(data).every((k)=>allowedUpdates.includes(k));
-    if(!isUpdatedAllowed){
-        throw new Error("Update Not allowed");
+    const allowedUpdates = ["age", "gender", "firstName", "lastName"];
+    const isUpdatedAllowed = Object.keys(data).every((k) =>
+      allowedUpdates.includes(k)
+    );
+    if (!isUpdatedAllowed) {
+      throw new Error("Update Not allowed");
     }
-    const user = await User.findByIdAndUpdate(userId,data,{
-        new:true,
-        runValidators:true
+    const user = await User.findByIdAndUpdate(userId, data, {
+      new: true,
+      runValidators: true,
     });
     res.send(user);
   } catch (error) {
