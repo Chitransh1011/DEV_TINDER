@@ -1,33 +1,40 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const { PORT } = require("./config/serverConfig");
+const bcrypt = require('bcrypt');
 const { adminAuth, userAuth } = require("./middlewares/auth");
 const User = require("./models/user");
+const {validateSignUp} = require('./utils/validation');
 const app = express();
 
 app.use(express.json());
 app.post("/signup", async (req, res) => {
   try {
-    const data = req.body;
-    const email = data?.emailId;
-    const password = data?.password;
-    if (!email || !password) {
-      res.status(404).send("Email and Password is required");
-    }
-    const user = new User(req.body);
-    console.log(user);
+    // Destructing the data
+    const {firstName,lastName,emailId,password,age,gender} = req.body;
+
+    // Validating the data
+    validateSignUp(req);
+
+    // Doing hashing by auto generating salt and applying 10 round on plain password
+    const hashpassword = await bcrypt.hash(password,10);
+  
+    // Creating new instance of User model by the data
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password:hashpassword,
+        age,
+        gender
+    });
+
+    // Saving in DB
     await user.save();
     res.send("User signuped successfully");
   } catch (error) {
-   
-    if (error.name === "ValidationError") {
         // this .errors and .name how you got to know console.log(error to check what are there )and you will se errors->will give Object
-      const errors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        message: err.message,
-      }));
-      return res.status(400).json({ message: "Validation failed", errors });
-    }
+      return res.status(400).send(error.message);
   }
 });
 app.get("/user", async (req, res) => {
