@@ -1,20 +1,31 @@
 const express = require("express");
-const PORT = 3000;
-const app = express();
+const connectDB = require("./config/database");
+const {PORT} = require('./config/serverConfig');
 const {adminAuth,userAuth} = require('./middlewares/auth');
+const User = require("./models/user");
+const app = express();
 
-app.use("/admin",adminAuth);
+// DUMMY DATA
+const data = {
+    firstName:"Virat",
+    lastName:"Kohli",
+    emailId:"virat@gmail.com",
+    password:"virat@123",
+    age:35,
+    gender:"Male"
+};
+app.post("/signup",async (req,res)=>{
+    const user = new User(data);
+    await user.save();
+    res.send("User signuped successfully");
+})
 
-app.get("/user/data",userAuth,(req,res)=>{
-    res.send("User Data sent");
-})
-app.get("/admin/getAllData",(req,res)=>{
-    // res.send("All data sent");
-    throw new Error("Something went Wrong");
-})
-app.use("/",(err,req,res,next)=>{
-    res.status(500).send(err.message)
-});
-app.listen(PORT,()=>{
+connectDB().then(()=>{
+    console.log("Database connected successfully");
+    app.listen(PORT,()=>{
     console.log(`Server started on PORT : ${PORT}`);
+})
+})
+.catch(()=>{
+    console.error("Database not connected");
 })
