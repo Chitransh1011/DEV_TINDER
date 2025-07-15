@@ -1,40 +1,59 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const { PORT } = require("./config/serverConfig");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const { adminAuth, userAuth } = require("./middlewares/auth");
 const User = require("./models/user");
-const {validateSignUp} = require('./utils/validation');
+const { validateSignUp } = require("./utils/validation");
 const app = express();
 
 app.use(express.json());
 app.post("/signup", async (req, res) => {
   try {
     // Destructing the data
-    const {firstName,lastName,emailId,password,age,gender} = req.body;
+    const { firstName, lastName, emailId, password, age, gender } = req.body;
 
     // Validating the data
     validateSignUp(req);
 
     // Doing hashing by auto generating salt and applying 10 round on plain password
-    const hashpassword = await bcrypt.hash(password,10);
-  
+    const hashpassword = await bcrypt.hash(password, 10);
+
     // Creating new instance of User model by the data
     const user = new User({
-        firstName,
-        lastName,
-        emailId,
-        password:hashpassword,
-        age,
-        gender
+      firstName,
+      lastName,
+      emailId,
+      password: hashpassword,
+      age,
+      gender,
     });
 
     // Saving in DB
     await user.save();
     res.send("User signuped successfully");
   } catch (error) {
-        // this .errors and .name how you got to know console.log(error to check what are there )and you will se errors->will give Object
-      return res.status(400).send(error.message);
+    // this .errors and .name how you got to know console.log(error to check what are there )and you will se errors->will give Object
+    return res.status(400).send(error.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isPassword = await bcrypt.compare(password, user.password);
+    console.log(user);
+    if (isPassword) {
+      res.send("Login successfully");
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  } catch (error) {
+    res.status(404).send(error.message);
   }
 });
 app.get("/user", async (req, res) => {
