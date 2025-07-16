@@ -1,15 +1,20 @@
 const express = require("express");
 const connectDB = require("./config/database");
-const { PORT,JWT_SECRET } = require("./config/serverConfig");
+const { PORT } = require("./config/serverConfig");
 const bcrypt = require("bcrypt");
-const { adminAuth, userAuth } = require("./middlewares/auth");
+const {  userAuth } = require("./middlewares/auth");
 const User = require("./models/user");
-const jwt = require('jsonwebtoken')
 const { validateSignUp } = require("./utils/validation");
 const cookieParser = require("cookie-parser");
+
+
 const app = express();
+
+//MIDDLEWARE
 app.use(cookieParser());
 app.use(express.json());
+
+// API'S
 app.post("/signup", async (req, res) => {
   try {
     // Destructing the data
@@ -46,10 +51,10 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid credentials");
     }
-    const isPassword = await bcrypt.compare(password, user.password);
-   
+    const isPassword = await user.validatePassword(password);
+    
     if (isPassword) {
-      const token = await jwt.sign({_id:user._id},JWT_SECRET,{expiresIn:'1h'});
+      const token = await user.getJWT();
       res.cookie('token',token);
       res.send("Logined Successfully");
     } else {
