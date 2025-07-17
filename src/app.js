@@ -1,12 +1,9 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const { PORT } = require("./config/serverConfig");
-const bcrypt = require("bcrypt");
-const {  userAuth } = require("./middlewares/auth");
-const User = require("./models/user");
-const { validateSignUp } = require("./utils/validation");
 const cookieParser = require("cookie-parser");
-
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
 
 const app = express();
 
@@ -14,60 +11,10 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
-// API'S
-app.post("/signup", async (req, res) => {
-  try {
-    // Destructing the data
-    const { firstName, lastName, emailId, password, age, gender } = req.body;
+app.use('/',authRouter);
+app.use('/',profileRouter);
 
-    // Validating the data
-    validateSignUp(req);
 
-    // Doing hashing by auto generating salt and applying 10 round on plain password
-    const hashpassword = await bcrypt.hash(password, 10);
-
-    // Creating new instance of User model by the data
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: hashpassword,
-      age,
-      gender,
-    });
-
-    // Saving in DB
-    await user.save();
-    res.send("User signuped successfully");
-  } catch (error) {
-    return res.status(400).send(error.message);
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-      throw new Error("Invalid credentials");
-    }
-    const isPassword = await user.validatePassword(password);
-    
-    if (isPassword) {
-      const token = await user.getJWT();
-      res.cookie('token',token);
-      res.send("Logined Successfully");
-    } else {
-      throw new Error("Invalid credentials");
-    }
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
-app.get("/profile",userAuth,async(req,res)=>{
-    const user = req.user;
-    res.send(user);
-})
 
 connectDB()
   .then(() => {
