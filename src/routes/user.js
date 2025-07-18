@@ -58,24 +58,28 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     });
   }
 });
-userRouter.get("/user/feed", userAuth, async (req, res) => {
+userRouter.get("/feed", userAuth, async (req, res) => {
   try {
-    const restUser = await User.find();
-    // IMP CONCEPT OF ARROW FUNCTION IS THAT WE CAN RETURN OBJECT BY USING () PARENTHESIS NO NEED OF RETURN
-    const data = restUser
-      .filter((row) => !row._id.equals(req.user._id))
-      .map((row) => ({
-          firstName: row.firstName,
-          lastName: row.lastName,
-          age: row.age,
-          gender: row.gender,
-          photoUrl: row.photoUrl,
-          about: row.about,
-          skills: row.skills,
-      }));
-    res.json({
-      data,
+    const hideUsers = new Set();
+    const removeUser = await connectionModel.find({
+        $or:[
+            {fromUserId:req.user._id},
+            {toUserId:req.user._id}
+        ]
+    }).select(["fromUserId","toUserId","-_id"]);
+    removeUser.forEach((row) => {
+        hideUsers.add(row.fromUserId.toString());
+        hideUsers.add(row.toUserId.toString());
     });
+    const users = await User.find({
+        $and:[
+            {_id:{$ne:req.user._id}},
+            {_id:{$nin:Array.from(hideUsers)}}
+        ]
+    })
+    res.json({
+        data:users
+    })
   } catch (error) {
     res.json({
       message: error.message,
