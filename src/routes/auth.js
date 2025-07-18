@@ -7,7 +7,7 @@ const authRouter = express.Router();
 authRouter.post("/signup", async (req, res) => {
   try {
     // Destructing the data
-    const { firstName, lastName, emailId, password, age, gender } = req.body;
+    const { firstName, lastName, emailId, password, age, gender,photoUrl,about,skills } = req.body;
 
     // Validating the data
     validateSignUp(req);
@@ -23,6 +23,9 @@ authRouter.post("/signup", async (req, res) => {
       password: hashpassword,
       age,
       gender,
+      photoUrl,
+      about,
+      skills
     });
 
     // Saving in DB

@@ -24,7 +24,7 @@ requestRouter.post(
       const existConnection = await connectionModel.findOne({
         $or: [
           { fromUserId, toUserId },
-          { fromUserId:toUserId, toUserId:fromUserId },
+          { fromUserId: toUserId, toUserId: fromUserId },
         ],
       });
       if (existConnection) {
@@ -45,6 +45,35 @@ requestRouter.post(
       res.json({
         message: err.message,
       });
+    }
+  }
+);
+
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedIn = req.user;
+      const isAllowedStatus = ["accepted", "rejected"];
+      const { status, requestId } = req.params;
+      if (!isAllowedStatus.includes(status)) {
+        res.status(400).json({ message: "Status is not valid" });
+      }
+      const connectionReq = await connectionModel.findOne({
+        _id: requestId,
+        toUserId: loggedIn._id,
+        status: "interested",
+      });
+      console.log(connectionReq)
+      if (!connectionReq) {
+        res.status(400).json({ message: "Connection is not valid" });
+      }
+      connectionReq.status = status;
+      const data = await connectionReq.save();
+      res.json({ message: "Connection is : " + status, data });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
   }
 );

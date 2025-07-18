@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
             required:true,
             unique:true,
             trim:true,
-            lowercase:true,
             validate(value){
                 if(!validator.isEmail(value)){
                     throw new Error("Invalid Email : "+value);
@@ -52,6 +51,18 @@ const userSchema = new mongoose.Schema(
                 }
             }
         },
+        photoUrl:{
+            type:String,
+            default:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+        },
+        about:{
+            type:String,
+            default:"This is my intro"
+        },
+        skills:{
+            type:[String],
+            default:[]
+        }
     },
     {
         timestamps:true

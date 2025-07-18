@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const connectionSchema = new mongoose.Schema({
     fromUserId:{
         type:mongoose.Schema.Types.ObjectId,
-        required:true
+        required:true,
+        ref:"User"
     },
     toUserId:{
         type:mongoose.Schema.Types.ObjectId,
-        required:true
+        required:true,
+        ref:"User"//See if user has logined fromUser then also will populate fromuser to fromuser that is why toUser ref is also necessary
     },
     status:{
         type:String,

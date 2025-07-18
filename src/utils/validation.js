@@ -12,7 +12,7 @@ const validateSignUp = (req) => {
   }
 };
 const validationEditProfile = (req) => {
-  const allowedItem = ["firstName", "lastName", "age", "gender"];
+  const allowedItem = ["firstName", "lastName", "age", "gender","photoUrl","about","skills"];
   const keys = Object.keys(req.body);
   const isAllowed = keys.every((key) => allowedItem.includes(key));
   return isAllowed;
