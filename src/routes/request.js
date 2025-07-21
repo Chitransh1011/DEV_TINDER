@@ -65,7 +65,6 @@ requestRouter.post(
         toUserId: loggedIn._id,
         status: "interested",
       });
-      console.log(connectionReq)
       if (!connectionReq) {
         res.status(400).json({ message: "Connection is not valid" });
       }

@@ -17,14 +17,14 @@ const userAuth = async(req,res,next)=>{
    try {
     const {token} = req.cookies;
     if(!token){
-        res.status(401).send("Please Login");
+        return res.status(401).send("Please Login");
     }
     const isTokenValid = await jwt.verify(token,JWT_SECRET);
     const user = await User.findById(isTokenValid._id);
     req.user = user
     next();
    } catch (error) {
-        res.status(400).send(error.message);
+        return res.status(400).send(error.message);
    }
 }
 module.exports = {

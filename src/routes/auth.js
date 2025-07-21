@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const { validateSignUp } = require("../utils/validation");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
@@ -7,7 +7,17 @@ const authRouter = express.Router();
 authRouter.post("/signup", async (req, res) => {
   try {
     // Destructing the data
-    const { firstName, lastName, emailId, password, age, gender,photoUrl,about,skills } = req.body;
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      age,
+      gender,
+      photoUrl,
+      about,
+      skills,
+    } = req.body;
 
     // Validating the data
     validateSignUp(req);
@@ -25,12 +35,14 @@ authRouter.post("/signup", async (req, res) => {
       gender,
       photoUrl,
       about,
-      skills
+      skills,
     });
 
     // Saving in DB
-    await user.save();
-    res.send("User signuped successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    res.cookie("token", token);
+    res.json({ message: "Sign up successfully", data: savedUser });
   } catch (error) {
     return res.status(400).send(error.message);
   }
@@ -39,15 +51,15 @@ authRouter.post("/signup", async (req, res) => {
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
+    const user = await User.findOne({ emailId: emailId });  
     if (!user) {
       throw new Error("Invalid credentials");
     }
     const isPassword = await user.validatePassword(password);
-    
+
     if (isPassword) {
       const token = await user.getJWT();
-      res.cookie('token',token);
+      res.cookie("token", token);
       res.send(user);
     } else {
       throw new Error("Invalid credentials");
@@ -56,11 +68,11 @@ authRouter.post("/login", async (req, res) => {
     res.status(404).send(error.message);
   }
 });
-authRouter.post("/logout",async(req,res)=>{
-    res.cookie('token',null,{
-      expires: new Date(Date.now())
-    });
-    res.send("LogOut Successfully");
-})
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.send("LogOut Successfully");
+});
 
 module.exports = authRouter;

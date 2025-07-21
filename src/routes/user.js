@@ -49,7 +49,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       if (row.fromUserId._id.equals(loggedIn._id)) {
         return row.toUserId;
       }
-      return fromUserId;
+      return row.fromUserId;
     });
     res.json({ data });
   } catch (error) {
