@@ -7,7 +7,7 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const cors = require("cors");
-
+require("./utils/cronJob")
 const app = express();
 
 //MIDDLEWARE
