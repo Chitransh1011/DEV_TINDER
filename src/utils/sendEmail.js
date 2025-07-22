@@ -1,12 +1,10 @@
 const nodemailer = require("nodemailer");
-const {SMTP_USERNAME,SMTP_PASSWORD, FROM_EMAIL} = require("../config/serverConfig")
+const { FROM_EMAIL, APP_PASSWORD} = require("../config/serverConfig")
 const transporter = nodemailer.createTransport({
-  host: "email-smtp.ap-south-1.amazonaws.com", 
-  port: 587, 
-  secure: false,
+ service: 'gmail',
   auth: {
-    user: SMTP_USERNAME, 
-    pass: SMTP_PASSWORD 
+    user: FROM_EMAIL, 
+    pass: APP_PASSWORD
   }
 });
 
@@ -18,6 +16,7 @@ const sendEmail = async (to, subject, text) => {
       subject,
       text
     });
+    console.log(info)
   } catch (err) {
     console.error("Error sending email:", err);
   }

@@ -40,7 +40,7 @@ requestRouter.post(
       const data = await connection.save();
 
       // TO SEND MAIL
-      // await sendEmail(FROM_EMAIL,"Request Send Successfully",`Hi ${req.user.firstName}, your Request is Send.`)
+      await sendEmail(FROM_EMAIL,"Request Send Successfully",`Hi ${req.user.firstName}, your Request is Send.`)
       res.json({
         status: 200,
         message: "Connection send successfully",
