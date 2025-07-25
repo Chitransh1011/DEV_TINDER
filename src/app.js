@@ -15,7 +15,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://dev-tinder-ui-kappa.vercel.app",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
