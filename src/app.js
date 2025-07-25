@@ -8,11 +8,15 @@ const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const cors = require("cors");
 const paymentRouter = require("./routes/payment");
+const http = require('http');
+const intitializeSocket = require("./utils/socket");
+const chatRouter = require("./routes/chat");
 require("./utils/cronJob")
 const app = express();
 
-//MIDDLEWARE
 
+
+//MIDDLEWARE
 app.use(
   cors({
     origin: [
@@ -32,11 +36,16 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", paymentRouter);
+app.use("/", chatRouter);
+
+const server = http.createServer(app);
+intitializeSocket(server);
+
 
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server started on PORT : ${process.env.PORT || 3001}`);
     });
   })
