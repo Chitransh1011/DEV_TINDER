@@ -22,6 +22,7 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
         "photoUrl",
         "about",
         "skills",
+        "isPremium"
       ]);
 
     res.json({
