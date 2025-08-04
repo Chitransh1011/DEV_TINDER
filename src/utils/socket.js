@@ -1,5 +1,7 @@
 const socket = require("socket.io");
+const { formatDistanceToNow, fromUnixTime } = require("date-fns");
 const Chat = require("../models/chat");
+
 const intitializeSocket = (server) => {
   const io = socket(server, {
     cors: {
@@ -13,11 +15,12 @@ const intitializeSocket = (server) => {
     socket.on("joinChat", ({ firstName, userId, totargetUserId }) => {
       const roomId = [userId, totargetUserId].sort().join("_");
       console.log(firstName + " joined : ", roomId);
+
       socket.join(roomId);
     });
     socket.on(
       "sendMessage",
-      async ({ firstName,lastName, userId, totargetUserId, text }) => {
+      async ({ firstName, lastName, userId, totargetUserId, text }) => {
         try {
           const roomId = [userId, totargetUserId].sort().join("_");
 
@@ -35,7 +38,7 @@ const intitializeSocket = (server) => {
             text,
           });
           await chat.save();
-          io.to(roomId).emit("messageRecieved", { firstName,lastName, text });
+          io.to(roomId).emit("messageRecieved", { firstName, lastName, text });
         } catch (error) {
           return res.status(400).json({
             message: error.message,
@@ -43,6 +46,9 @@ const intitializeSocket = (server) => {
         }
       }
     );
+    socket.on("disconnect", () => {
+      console.log(`User disconnected`);
+    });
   });
 };
 module.exports = intitializeSocket;
