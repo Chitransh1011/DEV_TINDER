@@ -125,7 +125,7 @@ DevTinder is a full-stack developer networking platform inspired by Tinder's swi
 | `POST` | `/request/review/:status/:requestId` | Yes | Accept or reject a request |
 | `GET` | `/user/requests/recieved` | Yes | Get pending incoming requests |
 | `GET` | `/user/connections` | Yes | Get all accepted connections |
-| `GET` | `/feed` | Yes | Discover new developers |
+| `GET` | `/feed?page=1&limit=10` | Yes | Discover new developers (default limit: 10; maximum: 50) |
 
 ### Chat
 | Method | Endpoint | Auth | Description |

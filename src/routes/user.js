@@ -61,6 +61,11 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
+    // Query params are intentionally bounded so a client cannot request an
+    // unbounded number of profiles in one call.
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 50);
+    const skip = (page - 1) * limit;
     const hideUsers = new Set();
     const removeUser = await connectionModel.find({
         $or:[
@@ -72,17 +77,34 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         hideUsers.add(row.fromUserId.toString());
         hideUsers.add(row.toUserId.toString());
     });
-    const users = await User.find({
+    const filter = {
         $and:[
             {_id:{$ne:req.user._id}},
             {_id:{$nin:Array.from(hideUsers)}}
         ]
-    })
+    };
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("firstName lastName age gender photoUrl about skills isPremium membershipType")
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(skip)
+        .limit(limit),
+      User.countDocuments(filter),
+    ]);
+
     res.json({
-        data:users
-    })
+      data: users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: skip + users.length < total,
+        hasPreviousPage: page > 1,
+      },
+    });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       message: error.message,
     });
   }
